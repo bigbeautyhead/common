@@ -20,6 +20,6 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 #     ${CMAKE_SOURCE_DIR}/include/log.h
 # )
 
-add_executable(test ${CMAKE_SOURCE_DIR}/test/main.cpp ${CMAKE_SOURCE_DIR}/src/log.cpp)
+add_executable(test ${CMAKE_SOURCE_DIR}/test/main.cpp)
 
 target_link_libraries(test PRIVATE fmt::fmt stdc++fs)
