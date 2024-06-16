@@ -3,20 +3,25 @@
 
 int main()
 {
-   try {
-        Logger logger(LogLevel::INFO);
+    //创建日志器
+    Logger logger(LogLevel::INFO);
+    LOG_INFO(logger, "Hello, World!");
 
-        int aa = 10;
-        std::string bb = "Hello";
+    int a = 10;
+    LOG_INFO(logger, "a = ", a);
+    int b = 20;
+    LOG_INFO(logger, "a = ", a, ", b = ", b);
+    int c = a + b;
+    LOG_INFO(logger, "a = ", a, ", b = ", b, ", a + b = ", c);
 
-        logger.debug("This is a debug message ", aa);
-        logger.info("This is an info message ", aa, bb);
-        logger.warning("This is a warning message ","test", aa, bb);
-        logger.error("This is an error message ", "test---", " ", aa, bb);
+    
 
-    } catch (const std::exception &e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-        return 1;
-    }
+
+
+
+
+
+
+
     return 0;
 }

@@ -22,6 +22,11 @@ enum class LogLevel {
     ERROR
 };
 
+#define LOG_DEBUG(logger, message, ...) logger.debug(message, ##__VA_ARGS__)
+#define LOG_INFO(logger, message, ...) logger.info(message, ##__VA_ARGS__)
+#define LOG_ERROR(logger, message, ...) logger.error(message, ##__VA_ARGS__)
+#define LOG_WARNING(logger, message, ...) logger.warning(message, ##__VA_ARGS__)
+
 class Logger {
 
 private:
@@ -32,6 +37,7 @@ private:
     void openLogFile();
     std::string getCurrentDate();
     void createLogDirectory();
+    void printdate(LogLevel level, const std::string& message);
 public:
     Logger(LogLevel level = LogLevel::INFO);
     ~Logger();
@@ -41,7 +47,11 @@ public:
     void log(LogLevel level, const std::string& message, const T& value);
     template<typename T, typename... Args>
     void logs(LogLevel level, const std::string& message, const T& value, const Args&... args);
-    void logs(LogLevel level, const std::string& message) {} // 基础模板终止递归
+    void logs(LogLevel level, const std::string& message) {
+        if (logFile.is_open()) {
+            logFile <<std::endl;
+        }
+    } // 基础模板终止递归
 
     // Append all values to the log message
     template<typename T>
@@ -112,13 +122,10 @@ void Logger::appendValues(std::ostringstream& logmessage, const T& value, const 
 template<typename T>
 void Logger::log(LogLevel level, const std::string& message, const T& value){
     if (level >= logLevel){
-        auto now = std::time(nullptr);
-        std::string levelStr = logLevelToString(level);
-        std::ostringstream logmessage;
-        logmessage << fmt::format("{:%Y-%m-%d %H:%M:%S} [{}] {}", fmt::localtime(now), levelStr, message);
-        appendValues(logmessage, value);
+        std::ostringstream values;
+        appendValues(values, value);
         if (logFile.is_open()) {
-            logFile << logmessage.str();
+            logFile << values.str();
         }
     }
 }
@@ -128,27 +135,43 @@ void Logger::logs(LogLevel level, const std::string& message, const T& value, co
     log(level, message, value);
     logs(level, message, args...);
 }
+
+void Logger::printdate(LogLevel level, const std::string& message)
+{
+    auto now = std::time(nullptr);
+    std::string levelStr = logLevelToString(level);
+    std::ostringstream logmessage;
+    logmessage << fmt::format("{:%Y-%m-%d %H:%M:%S} [{}] {}", fmt::localtime(now), levelStr, message);
+    if (logFile.is_open()) {
+        logFile << logmessage.str();
+    }
+}
+
 template<typename... Args>
 void Logger::debug(const std::string& message, Args... args)
 {
+    printdate(LogLevel::DEBUG, message);
     logs(LogLevel::DEBUG, message, args...); // Add an empty string as the third parameter
 }
 
 template <typename... Args>
 void Logger::info(const std::string& message, Args... args)
 {
+    printdate(LogLevel::INFO, message);
     logs(LogLevel::INFO, message, args...); // Add an empty string as the third parameter
 }
 
 template <typename... Args>
 void Logger::error(const std::string& message, Args... args)
 {
+    printdate(LogLevel::ERROR, message);
     logs(LogLevel::ERROR, message, args...); // Add an empty string as the third parameter
 }
 
 template <typename... Args>
 void Logger::warning(const std::string& message, Args... args)
 {
+    printdate(LogLevel::WARNING, message);
     logs(LogLevel::WARNING, message, args...); // Add an empty string as the third parameter
 }
 
